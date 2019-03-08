@@ -1,2 +1,2 @@
-# blockhain-sim
+# Noobcash
 Simulation of a blockchain system.
