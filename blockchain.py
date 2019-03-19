@@ -10,12 +10,21 @@ class Blockchain(object):
         self.current_transactions = []
         self.append_block(previous_hash=1, nonce=0)
 
-    def append_block(self, previous_hash, nonce):
-        # Creates a new Block and adds it to the chain
-        index = len(self.chain) + 1
-        transactions = self.current_transactions
-        block = Block(index,transactions,previous_hash)
-        
+
+    def append_block(self, curr_hash, previous_hash, nonce, timestamp,capacity):
+        # Creates and Adds a block to the chain 
+        block = Block(
+            index= len(self.chain) + 1,
+            timestamp=timestamp,
+            transactions=self.current_transactions,
+            nonce=nonce,
+            current_hash=curr_hash,
+            previous_hash=previous_hash
+        )
+        #Checks capacity
+        if len(block.transactions) != capacity:
+            raise Exception('invalid block capacity')
+
         self.current_transactions = []
         self.chain.append(block)
         return block
@@ -36,7 +45,7 @@ class Blockchain(object):
         for i in range (1,len(blockchain)):
             current_block = blockchain[i]
             previous_block_hash = blockchain[i-1].hash
-            if (!validate_block(current_block,previous_block_hash)):
+            if ( (validate_block(current_block,previous_block_hash)) != True):
                 return False
         reurn True
 
