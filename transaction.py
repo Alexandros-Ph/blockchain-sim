@@ -1,4 +1,3 @@
-import hashlib
 import json
 import binascii
 
@@ -10,39 +9,45 @@ from Crypto.Signature import PKCS1_v1_5
 import base64
 
 
+def create_transaction(sender_wallet, recipient_public, amount):
+    sum = 0
+    inputs = []
+    i=0
+    try:
+        if (sender_wallet.budget < amount):
+            raise Exception("Not enough money")
+
+        while (sum < amount):
+            sum += sender_wallet.utxos[i]["amount"]
+            inputs.append(i)
+            i+=1
+
+        trans = Transaction(sender_public, recipient_public, amount, inputs)
+        trans.sign()
+
+        return trans
+
+    except Exception as e:
+        print(f"create_transaction: {e.__class__.__name__}: {e}")
+        return None
+
 class Transaction(object):
 
-    def __init__(self, sender, recipient, sender_private_key, amount, inputs, id=None, signature=None):
+    def __init__(self, sender, recipient, amount, inputs, id=None, signature=None):
         # Initialize a transaction
-        self.sender = sender
-        self.recipient = recipient
-        self.sender_private_key = sender_private_key
+        self.sender = sender                #sender's public key
+        self.recipient = recipient          #recipient's public key
+        self.sender_private_key = str()
         self.amount = amount
-        self.inputs = inputs
+        self.inputs = inputs                #list of UTXOs
         self.id = id
         self.signature = signature
         self.outputs = []
 
 
-    def to_dict(self):
-        #convert transaction to dict without sender's private key
-        return dict(
-            sender=self.sender,
-            recipient=self.recipient,
-            amount=self.amount,
-            inputs=self.inputs,
-            id=self.id,
-            signature=self.signature
-        )
-
     def hash(self):
         '''convert to json string to calculate hash'''
-        transaction_string = json.dumps(dict(
-            sender=self.sender,
-            recipient=self.recipient,
-            amount=self.amount,
-            inputs=self.inputs,
-            ), sort_keys=True).encode()
+        transaction_string = f"{self.sender}{self.recipient}{self.amount}{self.inputs}".encode()
         #hash the transaction
         return SHA256.new(transaction_string)
 
@@ -86,11 +91,12 @@ class Transaction(object):
 
 
 """for testing"""
-# private_key = RSA.generate(1024)
-# privkey = private_key.exportKey('PEM').decode()
-# pubkey = private_key.publickey().exportKey('PEM').decode()
-# temp = Transaction(pubkey,2,privkey,10,[])
-# # print(privkey)
+private_key = RSA.generate(1024)
+privkey = private_key.exportKey('PEM').decode()
+pubkey = private_key.publickey().exportKey('PEM').decode()
+temp = Transaction(pubkey,2,privkey,10,[])
+# print(privkey)
 # first = temp.create_genesis_transaction(7, pubkey, privkey)
-# print(temp.sign())
-# print(temp.verify_signature())
+print(temp.sign())
+print(temp.verify_signature())
+print(vars(temp))

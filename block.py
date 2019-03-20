@@ -1,6 +1,6 @@
-import hashlib
 import json
 from time import time
+from Crypto.Hash import SHA256
 
 class Block(object):
 
@@ -16,11 +16,10 @@ class Block(object):
 
     def hash(self):
         # Creates a SHA-256 hash of a Block
-        block_dict = vars(self)                                             # object to dictionary conversion
-        if 'current_hash' in block_dict:
-            del block_dict['current_hash']                                  # delete current hash key from dictionary
-        block_string = json.dumps(block_dict, sort_keys=True).encode()      # dictionary to string conversion
-        return hashlib.sha256(block_string).hexdigest()                     # string to sha256 hash
+        # object to string conversion:
+        temp_string = f"{self.index}{self.timestamp}{self.transactions}{self.nonce}{self.previous_hash}"
+        block_string = temp_string.encode()                              # encode string 
+        return SHA256.new(block_string).hexdigest()                      # string to sha256 hash
 
 
     def mine_block(self, diff):
@@ -46,12 +45,11 @@ class Block(object):
         pass
 
 # for testing purposes:
-'''
+
 temp = Block(1, [], 1995)
 #print(vars(temp))
-#temp.current_hash = temp.hash()
+temp.current_hash = temp.hash()
 print(vars(temp))
 #print(temp.validate_block(1995))
 print(temp.mine_block(3))
 print(vars(temp))
-'''
