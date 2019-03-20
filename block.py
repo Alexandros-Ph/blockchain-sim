@@ -13,12 +13,16 @@ class Block(object):
         self.current_hash = str()
         self.previous_hash = prev_hash
 
+    @staticmethod
+    def create_genesis_block(genesis_transaction):
+        g_b = Block(0, [genesis_transaction], 1)
+        return g_b
 
     def hash(self):
         # Creates a SHA-256 hash of a Block
         # object to string conversion:
         temp_string = f"{self.index}{self.timestamp}{self.transactions}{self.nonce}{self.previous_hash}"
-        block_string = temp_string.encode()                              # encode string 
+        block_string = temp_string.encode()                              # encode string
         return SHA256.new(block_string).hexdigest()                      # string to sha256 hash
 
 
@@ -46,10 +50,10 @@ class Block(object):
 
 # for testing purposes:
 
-temp = Block(1, [], 1995)
+#temp = Block(1, [], 1995)
 #print(vars(temp))
-temp.current_hash = temp.hash()
-print(vars(temp))
+#temp.current_hash = temp.hash()
+#print(vars(temp))
 #print(temp.validate_block(1995))
-print(temp.mine_block(3))
-print(vars(temp))
+#print(temp.mine_block(3))
+#print(vars(temp))
