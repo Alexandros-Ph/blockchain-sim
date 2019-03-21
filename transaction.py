@@ -22,7 +22,7 @@ def create_transaction(sender_wallet, recipient_public, amount):
             inputs.append(sender_wallet.utxos[i])
             i+=1
 
-        trans = Transaction(sender_wallet.public_key, recipient_public, sender_wallet.private_key, amount, inputs)
+        trans = Transaction(sender_wallet.public_key, recipient_public, sender_wallet.private_key, amount, inputs, [])
         trans.sign()
         if (sum > amount):      #in case of having utxos' sum bigger than transaction's amount
             trans.outputs.append({
@@ -43,16 +43,16 @@ def create_transaction(sender_wallet, recipient_public, amount):
 
 class Transaction(object):
 
-    def __init__(self, sender, recipient, sender_private_key, amount, inputs, id=None, signature=None):
+    def __init__(self, sender, recipient, sender_private_key, amount, inputs, outputs, id=None, signature=None):
         # Initialize a transaction
         self.sender = sender                #sender's public key
         self.recipient = recipient          #recipient's public key
         self.sender_private_key = sender_private_key
         self.amount = amount
         self.inputs = inputs                #list of UTXOs
+        self.outputs = outputs
         self.id = id
         self.signature = signature
-        self.outputs = []
 
 
     def hash(self):
@@ -60,7 +60,6 @@ class Transaction(object):
         transaction_string = f'{self.sender}{self.recipient}{self.amount}{self.inputs}'.encode()
         #hash the transaction
         return SHA256.new(transaction_string)
-
 
     def sign(self):
         """
@@ -89,7 +88,7 @@ class Transaction(object):
         trans.verify_signature()          # a)validation of Signature
 
         verified_amount = 0
-        for i in trans.inputs:                 # b)verify that inputs are current utxos of sender
+        for i in trans.inputs:            # b)verify that inputs are current utxos of sender
             verified = False
             for c_utxos in wallets[sender_id].utxos:
                 if (i['id'] == c_utxos['id'] and sender_id == c_utxos['to_who']):  #the input is verified as utxo
@@ -177,9 +176,10 @@ w2.utxos=[{'id': 23,
 wallets.append(w2)
 # print(wallets[0].utxos)
 temp = create_transaction(w, w2.public_key, 10)
+
 # print(vars(temp))
-msg, t = Transaction.validate_transaction(temp, 1, 2)
-print(msg)
+#msg, t = Transaction.validate_transaction(temp, 1, 2)
+#print(msg)
 
 
 # print(privkey)
