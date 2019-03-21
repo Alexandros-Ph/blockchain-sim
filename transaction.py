@@ -105,6 +105,21 @@ class Transaction(object):
              raise Exception('Not enough money')
 
         #create transaction outputs
+        temp = []
+        if (verified_amount > trans.amount):      #in case of having utxos' sum bigger than transaction's amount
+            temp.append({
+                'id': trans.id,
+                'to_who': trans.sender,
+                'amount': verified_amount - trans.amount
+            })
+        temp.append({
+           'id': trans.id,
+           'to_who': trans.recipient,
+           'amount': trans.amount
+           })
+
+        if (temp != trans.outputs):
+             raise Exception('Wrong outputs')
 
         #insert outputs in UTXOs
         if(len (trans.outputs) == 2):
