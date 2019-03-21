@@ -91,11 +91,11 @@ class Transaction(object):
         verified_amount = 0
         for i in trans.inputs:                 # b)verify that inputs are current utxos of sender
             verified = False
-            for c_utxos in wallets[sender_id-1].utxos:
+            for c_utxos in wallets[sender_id].utxos:
                 if (i['id'] == c_utxos['id'] and sender_id == c_utxos['to_who']):  #the input is verified as utxo
                     verified = True
                     verified_amount  += c_utxos['amount']
-                    wallets[sender_id-1].utxos.remove(c_utxos)
+                    wallets[sender_id].utxos.remove(c_utxos)
                     break
             if (not verified): #in case that an input is not verified
                 raise Exception('Input is not a UTXO')
@@ -123,10 +123,10 @@ class Transaction(object):
 
         #insert outputs in UTXOs
         if(len (trans.outputs) == 2):
-            wallets[sender_id-1].utxos.append(trans.outputs[0])
-            wallets[receiver_id-1].utxos.append(trans.outputs[1])
+            wallets[sender_id].utxos.append(trans.outputs[0])
+            wallets[receiver_id].utxos.append(trans.outputs[1])
         else:
-            wallets[receiver_id-1].utxos.append(trans.outputs[0])
+            wallets[receiver_id].utxos.append(trans.outputs[0])
 
         return 'validated',trans
 

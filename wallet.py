@@ -4,10 +4,12 @@ from Crypto.PublicKey import RSA
 
 class Wallet(object):
 
-    def __init__(self):
+    def __init__(self, private_key, public_key, utxos):
         # Initialize a Wallet
-        rsa_key = RSA.generate(1024)
-        self.private_key = rsa_key.exportKey('PEM').decode()
-        self.public_key = rsa_key.publickey().exportKey('PEM').decode()
-        self.budget = 0
-        self.utxos = []
+        self.private_key = private_key
+        self.public_key = public_key
+        self.utxos = utxos
+        sum = 0
+        for i in self.utxos:
+            sum += self.utxos['amount']
+        self.budget = sum
