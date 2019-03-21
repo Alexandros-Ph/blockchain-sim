@@ -1,38 +1,46 @@
 import requests
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, request, render_template, abort
 from flask_cors import CORS
+import json
 
 
 import block
-import node
 import blockchain
 import wallet
-import transaction
-import wallet
+import transaction as tr
 
 
 ### JUST A BASIC EXAMPLE OF A REST API WITH FLASK
 
 
-
 app = Flask(__name__)
 CORS(app)
-blockchain = Blockchain()
 
 
 #.......................................................................................
 
 
 
-# get all transactions in the blockchain
 
+# get all transactions in the blockchain
+'''
 @app.route('/transactions/get', methods=['GET'])
 def get_transactions():
     transactions = blockchain.transactions
 
     response = {'transactions': transactions}
     return jsonify(response), 200
+'''
 
+@app.route('/transaction/get', methods=['POST'])
+def reciever():
+    if not request.json:
+        abort(400)
+    #print(request.json)
+    data = json.loads(json.dumps(request.json))    # dictionary
+    temp_trans = tr.Transaction(data['sender'], data['recipient'], None, data['amount'], data['inputs'], data['outputs'], data['id'], data['signature'])
+    print(tr.Transaction.validate_transaction(temp_trans, 0, 1))
+    return json.dumps(data)
 
 
 # run it once fore every node
@@ -45,4 +53,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     port = args.port
 
-    app.run(host='127.0.0.1', port=port)
+    app.run(host='127.0.0.1', port=5000)

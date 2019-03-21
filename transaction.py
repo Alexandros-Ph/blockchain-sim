@@ -1,4 +1,6 @@
 import json
+import requests
+import settings as st
 
 import wallet
 import Crypto
@@ -133,13 +135,13 @@ class Transaction(object):
 
     @staticmethod
     def create_genesis_transaction(num_nodes, bootstrap_wallet):
-         t = Transaction(str(), bootstrap_wallet.public_key, str(), 100*num_nodes, [])
+         t = Transaction(str(), bootstrap_wallet.public_key, str(), 100*num_nodes, [], [])
 
-         t.outputs = [{
+         t.outputs = {
             'id': t.id,
             'to_who': bootstrap_wallet.public_key,
             'amount': 100*num_nodes
-            }]
+            }
          bootstrap_wallet.utxos.append(t.outputs)
          bootstrap_wallet.budget = 100*num_nodes
          return t
@@ -147,35 +149,39 @@ class Transaction(object):
 
 """for testing"""
 
-# print(vars(create_transaction(Wallet(), 9, 40)))
-# private_key = RSA.generate(1024)
-# privkey = private_key.exportKey('PEM').decode()
-# pubkey = private_key.publickey().exportKey('PEM').decode()
+private_key = RSA.generate(1024)
+privkey = private_key.exportKey('PEM').decode()
+pubkey = private_key.publickey().exportKey('PEM').decode()
 
 
 wallets = []
-w = wallet.Wallet()
-w.budget = 100
-w.utxos=[{'id': 23,
-    'to_who': 1,
-    'amount': 40
-    },{'id': 24,
-    'to_who': 1,
-    'amount': 60
-    }]
+utxos=[{'id': 99,
+'to_who': 0,
+'amount': 40
+},{'id': 24,
+'to_who': 0,
+'amount': 60
+}]
+w = wallet.Wallet(privkey, pubkey, utxos)
 wallets.append(w)
-w2 = wallet.Wallet()
-w2.budget = 50
-w2.utxos=[{'id': 23,
-    'to_who': 2,
+
+private_key = RSA.generate(1024)
+privkey = private_key.exportKey('PEM').decode()
+pubkey = private_key.publickey().exportKey('PEM').decode()
+
+
+utxos=[{'id': 99,
+    'to_who': 1,
     'amount': 30
     },{'id': 24,
-    'to_who': 2,
+    'to_who': 1,
     'amount': 20
     }]
+w2 = wallet.Wallet(privkey, pubkey, utxos)
 wallets.append(w2)
 # print(wallets[0].utxos)
 temp = create_transaction(w, w2.public_key, 10)
+print(st.broadcast(vars(temp)))
 
 # print(vars(temp))
 #msg, t = Transaction.validate_transaction(temp, 1, 2)

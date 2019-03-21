@@ -11,5 +11,5 @@ class Wallet(object):
         self.utxos = utxos
         sum = 0
         for i in self.utxos:
-            sum += self.utxos['amount']
+            sum += i['amount']
         self.budget = sum
