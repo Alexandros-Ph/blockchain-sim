@@ -83,6 +83,18 @@ class Transaction(object):
         hash_obj = self.hash()
         return verifier.verify(hash_obj, base64.b64decode(self.signature))
 
+    def validate_transaction(self, wallet_id):
+        self.verify_signature()          # a)validation of Signature
+        verified_amount = 0
+        for i in self.inputs:                 # b)verify that inputs are current utxos of sender
+            for c_utxos in wallets[wallet_id].utxos:
+                if (i['id'] == c_utxos['id'] and self.sender == c_utxos['sender']):  #the input is verified as utxo
+                    verified = True
+                    verified_amount  = 
+                    wallets[wallet_id].utxos.remove(c_utxos)
+
+
+
     @staticmethod
     def create_genesis_transaction(num_nodes, bootstrap_wallet):
          t = Transaction(str(), bootstrap_wallet.public_key, str(), 100*num_nodes, [])
