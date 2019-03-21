@@ -1,5 +1,6 @@
 import json
 
+import wallet
 import Crypto
 import Crypto.Random
 from Crypto.Hash import SHA256
@@ -56,7 +57,7 @@ class Transaction(object):
 
     def hash(self):
         '''convert to json string to calculate hash'''
-        transaction_string = f"{self.sender}{self.recipient}{self.amount}{self.inputs}".encode()
+        transaction_string = f'{self.sender}{self.recipient}{self.amount}{self.inputs}'.encode()
         #hash the transaction
         return SHA256.new(transaction_string)
 
@@ -83,15 +84,36 @@ class Transaction(object):
         hash_obj = self.hash()
         return verifier.verify(hash_obj, base64.b64decode(self.signature))
 
-    def validate_transaction(self, wallet_id):
-        self.verify_signature()          # a)validation of Signature
+    @staticmethod
+    def validate_transaction(trans, sender_id, receiver_id): #wallet_id is sender's id
+        trans.verify_signature()          # a)validation of Signature
+
         verified_amount = 0
-        for i in self.inputs:                 # b)verify that inputs are current utxos of sender
-            for c_utxos in wallets[wallet_id].utxos:
-                if (i['id'] == c_utxos['id'] and self.sender == c_utxos['sender']):  #the input is verified as utxo
+        for i in trans.inputs:                 # b)verify that inputs are current utxos of sender
+            verified = False
+            for c_utxos in wallets[sender_id-1].utxos:
+                if (i['id'] == c_utxos['id'] and sender_id == c_utxos['to_who']):  #the input is verified as utxo
                     verified = True
-                    verified_amount  = 
-                    wallets[wallet_id].utxos.remove(c_utxos)
+                    verified_amount  += c_utxos['amount']
+                    wallets[sender_id-1].utxos.remove(c_utxos)
+                    break
+            if (not verified): #in case that an input is not verified
+                raise Exception('Input is not a UTXO')
+
+        # if verified inputs are not enough for the transaction
+        if verified_amount < trans.amount:
+             raise Exception('Not enough money')
+
+        #create transaction outputs
+
+        #insert outputs in UTXOs
+        if(len (trans.outputs) == 2):
+            wallets[sender_id-1].utxos.append(trans.outputs[0])
+            wallets[receiver_id-1].utxos.append(trans.outputs[1])
+        else:
+            wallets[receiver_id-1].utxos.append(trans.outputs[0])
+
+        return 'validated',trans
 
 
 
@@ -115,7 +137,36 @@ class Transaction(object):
 # private_key = RSA.generate(1024)
 # privkey = private_key.exportKey('PEM').decode()
 # pubkey = private_key.publickey().exportKey('PEM').decode()
-# temp = Transaction(pubkey,2,privkey,10,[])
+
+
+wallets = []
+w = wallet.Wallet()
+w.budget = 100
+w.utxos=[{'id': 23,
+    'to_who': 1,
+    'amount': 40
+    },{'id': 24,
+    'to_who': 1,
+    'amount': 60
+    }]
+wallets.append(w)
+w2 = wallet.Wallet()
+w2.budget = 50
+w2.utxos=[{'id': 23,
+    'to_who': 2,
+    'amount': 30
+    },{'id': 24,
+    'to_who': 2,
+    'amount': 20
+    }]
+wallets.append(w2)
+# print(wallets[0].utxos)
+temp = create_transaction(w, w2.public_key, 10)
+# print(vars(temp))
+msg, t = Transaction.validate_transaction(temp, 1, 2)
+print(msg)
+
+
 # print(privkey)
 # first = temp.create_genesis_transaction(7, pubkey, privkey)
 # print(temp.sign())
