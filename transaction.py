@@ -2,6 +2,7 @@ import json
 import requests
 import settings as st
 
+
 import wallet
 import Crypto
 import Crypto.Random
@@ -9,7 +10,6 @@ from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 import base64
-
 
 def create_transaction(sender_wallet, recipient_public, amount):
     sum = 0
@@ -85,6 +85,7 @@ class Transaction(object):
         hash_obj = self.hash()
         return verifier.verify(hash_obj, base64.b64decode(self.signature))
 
+
     @staticmethod
     def validate_transaction(trans, sender_id, receiver_id): #wallet_id is sender's id
         trans.verify_signature()          # a)validation of Signature
@@ -92,11 +93,12 @@ class Transaction(object):
         verified_amount = 0
         for i in trans.inputs:            # b)verify that inputs are current utxos of sender
             verified = False
-            for c_utxos in wallets[sender_id].utxos:
-                if (i['id'] == c_utxos['id'] and sender_id == c_utxos['to_who']):  #the input is verified as utxo
+            for c_utxos in st.wallets[sender_id].utxos:
+                print(sender_id, c_utxos['to_who'])
+                if (i['id'] == c_utxos['id'] and st.wallets[sender_id].public_key == c_utxos['to_who']):  #the input is verified as utxo
                     verified = True
                     verified_amount  += c_utxos['amount']
-                    wallets[sender_id].utxos.remove(c_utxos)
+                    st.wallets[sender_id].utxos.remove(c_utxos)
                     break
             if (not verified): #in case that an input is not verified
                 raise Exception('Input is not a UTXO')
@@ -124,10 +126,10 @@ class Transaction(object):
 
         #insert outputs in UTXOs
         if(len (trans.outputs) == 2):
-            wallets[sender_id].utxos.append(trans.outputs[0])
-            wallets[receiver_id].utxos.append(trans.outputs[1])
+            st.wallets[sender_id].utxos.append(trans.outputs[0])
+            st.wallets[receiver_id].utxos.append(trans.outputs[1])
         else:
-            wallets[receiver_id].utxos.append(trans.outputs[0])
+            st.wallets[receiver_id].utxos.append(trans.outputs[0])
 
         return 'validated',trans
 

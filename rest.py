@@ -40,7 +40,12 @@ def reciever():
     #print(request.json)
     data = json.loads(json.dumps(request.json))    # dictionary
     temp_trans = tr.Transaction(data['sender'], data['recipient'], None, data['amount'], data['inputs'], data['outputs'], data['id'], data['signature'])
-    print(tr.Transaction.validate_transaction(temp_trans, 0, 1))
+    for j in range (3):
+        if (temp_trans.sender==st.wallets[j].public_key):
+            send_id = j
+        if (temp_trans.recipient==st.wallets[j].public_key):
+            rec_id = j
+    print(tr.Transaction.validate_transaction(temp_trans, send_id, rec_id))
     return json.dumps(data)
 
 @app.route('/wallet/get', methods=['POST'])
@@ -52,13 +57,13 @@ def rec_key():
     temp_wall = wl.Wallet(None, data['public_key'], data['utxos'])
     st.ids.append(data['node_id'])
     print (vars(temp_wall))
-    init.wallets.append(temp_wall)
-    if (len(init.wallets)==st.n):
-        for wall in init.wallets:
+    st.wallets.append(temp_wall)
+    if (len(st.wallets)==st.n):
+        for wall in st.wallets:
             print(vars(wall))
             init.wall_list.append(vars(wall))
         print(st.ids)
-        return st.broadcast(init.wall_list, "wallet/all", st.ips[st.my_id])
+    #    return st.broadcast(init.wall_list, "wallet/all", st.ips[st.my_id])
     return "Wallet ok"
 
 @app.route('/wallet/all', methods=['POST'])
@@ -69,8 +74,10 @@ def rec_wall():
     data = json.loads(json.dumps(request.json))    # list
     for wall in data:
         print(wall)
-
-
+    for wall in data:
+        temp_wall = wl.Wallet(None, wall['public_key'], wall['utxos'])
+        st.wallets.append(temp_wall)
+    print(st.wallets)
     return json.dumps(data)
 
 
@@ -84,4 +91,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     port = args.port
 
-    app.run(host=st.ips[st.my_id], port=5000, threaded=True)
+    app.run(host='localhost', port=5000, threaded=True)

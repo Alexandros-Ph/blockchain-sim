@@ -1,28 +1,32 @@
 import requests
-
+wallets=[]
 difficulty = 3
-n = 4
+n = 3
 capacity = 5
 my_id = 0
-ips = ["192.168.0.1","192.168.0.3","192.168.0.4","192.168.0.5"]
+ips = ["localhost:5000","localhost:5002","localhost:5001"]
 ids = []
+r=[0, 0, 0]
 
 def broadcast(something, url, exclude):
     status=[]
+    i=0
     for ip in ips:
         if (ip==exclude):
             continue
-        url = f"http://{ip}:5000/{url}"
+        print(ip)
+        url = f"http://{ip}/{url}"
         headers = {'Content-type': 'application/json'}
-        r = requests.post(url, json=something, headers=headers)
-        if (r.status_code == 200):
+        r[i] = requests.post(url, json=something, headers=headers)
+        if (r[i].status_code == 200):
             status.append("Recieved")
         else:
-            status.append(f"Not recieved, reason: {r.reason}, status code: {r.status_code}")
+            status.append(f"Not recieved, reason: {r[i].reason}, status code: {r[i].status_code}")
+        i+=1
     return status
 
 def send(something, url, node_ip):
-    url = f"http://{node_ip}:5000/{url}"
+    url = f"http://{node_ip}/{url}"
     headers = {'Content-type': 'application/json'}
     r = requests.post(url, json=something, headers=headers)
     if (r.status_code == 200):
