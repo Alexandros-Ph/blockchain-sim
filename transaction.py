@@ -147,7 +147,7 @@ class Transaction(object):
          return t
 
 
-"""for testing"""
+"""for testing
 
 private_key = RSA.generate(1024)
 privkey = private_key.exportKey('PEM').decode()
@@ -179,9 +179,10 @@ utxos=[{'id': 99,
     }]
 w2 = wallet.Wallet(privkey, pubkey, utxos)
 wallets.append(w2)
+"""
 # print(wallets[0].utxos)
-temp = create_transaction(w, w2.public_key, 10)
-print(st.broadcast(vars(temp)))
+#temp = create_transaction(w, w2.public_key, 10)
+#print(st.broadcast(vars(temp)))
 
 # print(vars(temp))
 #msg, t = Transaction.validate_transaction(temp, 1, 2)

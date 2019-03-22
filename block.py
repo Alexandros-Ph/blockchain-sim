@@ -44,10 +44,6 @@ class Block(object):
         return (x and y)
 
 
-    def broadcast_block(self):
-
-        pass
-
 # for testing purposes:
 
 #temp = Block(1, [], 1995)

@@ -5,9 +5,11 @@ import json
 
 
 import block
-import blockchain
-import wallet
+import blockchain as bl_ch
+import wallet as wl
 import transaction as tr
+import settings as st
+import init
 
 
 ### JUST A BASIC EXAMPLE OF A REST API WITH FLASK
@@ -18,7 +20,6 @@ CORS(app)
 
 
 #.......................................................................................
-
 
 
 
@@ -42,6 +43,20 @@ def reciever():
     print(tr.Transaction.validate_transaction(temp_trans, 0, 1))
     return json.dumps(data)
 
+@app.route('/wallet/get', methods=['POST'])
+def rec_key():
+    if not request.json:
+        abort(400)
+    #print(request.json)
+    data_key = json.loads(json.dumps(request.json))    # dictionary
+    temp_wall = wl.Wallet(None, data['public_key'], data['utxos'])
+    print (vars(temp_wall))
+    init.wallets.append(temp_wall)
+    if (len(init.wallets)==st.n):
+        init.wallets.sort(key=lambda x: x.utxos[0])
+        print(init.wallets)
+    return json.dumps(data_key)
+
 
 # run it once fore every node
 
@@ -53,4 +68,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     port = args.port
 
-    app.run(host='127.0.0.1', port=5000)
+    app.run(host=st.ips[st.my_id], port=5000)
