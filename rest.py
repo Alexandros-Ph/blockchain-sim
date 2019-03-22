@@ -48,14 +48,30 @@ def rec_key():
     if not request.json:
         abort(400)
     #print(request.json)
-    data_key = json.loads(json.dumps(request.json))    # dictionary
+    data = json.loads(json.dumps(request.json))    # dictionary
     temp_wall = wl.Wallet(None, data['public_key'], data['utxos'])
+    st.ids.append(data['node_id'])
     print (vars(temp_wall))
     init.wallets.append(temp_wall)
     if (len(init.wallets)==st.n):
-        init.wallets.sort(key=lambda x: x.utxos[0])
-        print(init.wallets)
-    return json.dumps(data_key)
+        for wall in init.wallets:
+            print(vars(wall))
+            init.wall_list.append(vars(wall))
+        print(st.ids)
+        return st.broadcast(init.wall_list, "wallet/all", st.ips[st.my_id])
+    return "Wallet ok"
+
+@app.route('/wallet/all', methods=['POST'])
+def rec_wall():
+    if not request.json:
+        abort(400)
+    #print(request.json)
+    data = json.loads(json.dumps(request.json))    # list
+    for wall in data:
+        print(wall)
+
+
+    return json.dumps(data)
 
 
 # run it once fore every node
@@ -68,4 +84,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     port = args.port
 
-    app.run(host=st.ips[st.my_id], port=5000)
+    app.run(host=st.ips[st.my_id], port=5000, threaded=True)
